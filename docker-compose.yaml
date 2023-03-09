@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  nexus:
+    image: sonatype/nexus3:3.49.0
+    container_name: nexus_ct
+    ports:
+      - 8081:8081
+    environment:
+      - TZ=UTC 
+    networks:
+      - proxy_nt
+    labels:
+      # enable traefik
+      - "traefik.enable=true"
+############################################
+############################################
+# Nexus Router 
+      # router
+      - "traefik.http.routers.${ROUTEUR_NAME}.rule=Host(`${DOMAIN_NAME}`)"
+      - "traefik.http.routers.${ROUTEUR_NAME}.entrypoints=websecure"
+      - "traefik.http.routers.${ROUTEUR_NAME}.service=${SERVICE_NAME}"
+      # certificate SSL HTTPS
+      - traefik.http.routers.${ROUTEUR_NAME}.tls=true
+      - traefik.http.routers.${ROUTEUR_NAME}.tls.certresolver=lets-encrypt
+      # service
+      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=${CONTAINER_PORT}
+      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.scheme=http
+############################################
+############################################
+# Registry Router 
+      # router
+      - "traefik.http.routers.${REGISTRY_ROUTEUR_NAME}.rule=Host(`${REGISTRY_DOMAIN_NAME}`)"
+      - "traefik.http.routers.${REGISTRY_ROUTEUR_NAME}.entrypoints=websecure"
+      - "traefik.http.routers.${REGISTRY_ROUTEUR_NAME}.service=${REGISTRY_SERVICE_NAME}"
+      # certificate SSL HTTPS
+      - traefik.http.routers.${REGISTRY_ROUTEUR_NAME}.tls=true
+      - traefik.http.routers.${REGISTRY_ROUTEUR_NAME}.tls.certresolver=lets-encrypt
+      # service
+      - traefik.http.services.${REGISTRY_SERVICE_NAME}.loadbalancer.server.port=${REGISTRY_CONTAINER_PORT}
+      - traefik.http.services.${REGISTRY_SERVICE_NAME}.loadbalancer.server.scheme=http
+
+    volumes:
+      - nexus-data:/nexus-data
+
+volumes:
+  nexus-data:
+    name: nexus-data
+    driver: local #Optional
+
+networks:
+  proxy_nt:
+    external: true
