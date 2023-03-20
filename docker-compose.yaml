@@ -18,19 +18,20 @@ services:
       # router
       - "traefik.http.routers.${ROUTEUR_NAME}.rule=Host(`${DOMAIN_NAME}`)"
       - "traefik.http.routers.${ROUTEUR_NAME}.entrypoints=websecure"
-      - "traefik.http.routers.${ROUTEUR_NAME}.service=${SERVICE_NAME}"
+      - "traefik.http.routers.${ROUTEUR_NAME}.service=${SERVICE_NAME}" #Optional, obligé if more one service per container
       # certificate SSL HTTPS
       - traefik.http.routers.${ROUTEUR_NAME}.tls=true
       - traefik.http.routers.${ROUTEUR_NAME}.tls.certresolver=lets-encrypt
       # service
-      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=${CONTAINER_PORT}
-      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.scheme=http
+      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=${CONTAINER_PORT} #Optional, obligé if more one service per container
+      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.scheme=http #Optional, obligé if more one service per container
 ############################################
 ############################################
 # Registry Router 
       # router
       - "traefik.http.routers.${REGISTRY_ROUTEUR_NAME}.rule=Host(`${REGISTRY_DOMAIN_NAME}`)"
       - "traefik.http.routers.${REGISTRY_ROUTEUR_NAME}.entrypoints=websecure"
+      #Assign the service here and I create it below line 40
       - "traefik.http.routers.${REGISTRY_ROUTEUR_NAME}.service=${REGISTRY_SERVICE_NAME}"
       # certificate SSL HTTPS
       - traefik.http.routers.${REGISTRY_ROUTEUR_NAME}.tls=true
@@ -38,6 +39,19 @@ services:
       # service
       - traefik.http.services.${REGISTRY_SERVICE_NAME}.loadbalancer.server.port=${REGISTRY_CONTAINER_PORT}
       - traefik.http.services.${REGISTRY_SERVICE_NAME}.loadbalancer.server.scheme=http
+############################################
+############################################
+# Registry Router 
+      # router
+      - "traefik.http.routers.${MIRROR_ROUTEUR_NAME}.rule=Host(`${MIRROR_DOMAIN_NAME}`)"
+      - "traefik.http.routers.${MIRROR_ROUTEUR_NAME}.entrypoints=websecure"
+      - "traefik.http.routers.${MIRROR_ROUTEUR_NAME}.service=${MIRROR_SERVICE_NAME}"
+      # certificate SSL HTTPS
+      - traefik.http.routers.${MIRROR_ROUTEUR_NAME}.tls=true
+      - traefik.http.routers.${MIRROR_ROUTEUR_NAME}.tls.certresolver=lets-encrypt
+      # service
+      - traefik.http.services.${MIRROR_SERVICE_NAME}.loadbalancer.server.port=${MIRROR_CONTAINER_PORT}
+      - traefik.http.services.${MIRROR_SERVICE_NAME}.loadbalancer.server.scheme=http
 
     volumes:
       - nexus-data:/nexus-data
